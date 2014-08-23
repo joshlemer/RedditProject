@@ -3,21 +3,23 @@ import praw
 class User:
     def __init__(self,projection, user):
         self.userName = str(user)
-        self.subredditFrequency = {}
+        self.subredditFrequencies = {}
         self.userObject = user
         self.projection = projection
+        self.totalComments = 0.0
+
     def get_frequencies(self):
         for comment in self.userObject.get_comments():
             self.register_comment(comment.subreddit.display_name)
 
     def register_comment(self, subredditName):
-        if subredditName in self.subredditFrequency:
-            self.subredditFrequency[subredditName] += 1
+        if subredditName in self.subredditFrequencies:
+            self.subredditFrequencies[subredditName] += 1
         else:
-            self.subredditFrequency[subredditName] = 1
-
-        if subredditName is self.projection.subredditName:
+            self.subredditFrequencies[subredditName] = 1
+        if subredditName is self.projection.subreddit.display_name:
             self.projection.totalComments += 1
+        self.totalComments += 1
 
 
 class Projection:
@@ -27,40 +29,50 @@ class Projection:
         self.thing_limit = 10
         self.subreddit = self.reddit.get_subreddit(subredditName)
         self.comments = {}
+        self.subredditFrequencies = {}
         self.commentors = []
         self.commentorNames = []
-        self.totalComments = 0
+        self.totalComments = 0.0
 
     def get_comments(self):
         self.comments = list(self.subreddit.get_comments(limit=self.thing_limit))
 
-    def get_commentor_frequency(self):
+    def register_subreddit_frequency (self, subredditName, frequency):
+        if subredditName in self.subredditFrequencies:
+            self.subredditFrequencies[subredditName] += frequency
+        else:
+            self.subredditFrequencies[subredditName] = frequency
+
+    def register_subreddit_frequencies(self):
+        for commentor in self.commentors:
+            for freq in commentor.subredditFrequencies:
+                self.register_subreddit_frequency(self.calculate_frequency(commentor, freq))
+
+    def calculate_frequency(self, commentor, subreddit):
+        #(commentorComments in origSub / totalInOriginalSub) * (frequencyOfCommentorInSubreddit / totalCommenterComments)
+
+        origSubComments = commentor.subredditFrequencies[self.subreddit.display_name]
+        absFreq = commentor.subredditFrequencies[subreddit]
+
+        return ((origSubComments + 0.0)/self.totalComments) * ((0.0 + absFreq) / commentor.totalComments)
+
+    def get_commentor_frequencies(self):
         for comment in self.comments:
             if str(comment.author) not in self.commentorNames:
                 self.commentorNames.append(str(comment.author))
                 newUser = User(self,comment.author)
                 newUser.get_frequencies()
                 self.commentors.append(newUser)
-                print newUser.subredditFrequency
 
-
-
-
-def getSubredditCommentDistribution(subreddit):
-    comments =  subreddit.get_comments()
-
-    return comments_by_user
-
-
-#subreddit = r.get_subreddit('LibertarianWallpapers')
-#reddit_distribution = getSubredditCommentDistribution(subreddit)
-#print(getSubredditCommentDistribution(subreddit))
-
-myProj = Projection('Technology')
+myProj = Projection('askcoffee')
 
 myProj.get_comments()
 
-myProj.get_commentor_frequency()
+myProj.get_commentor_frequencies()
+
+myProj.register_subreddit_frequencies()
+
+print myProj.subredditFrequencies
 
 
 
