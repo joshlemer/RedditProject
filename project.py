@@ -10,7 +10,8 @@ class User:
         self.totalComments = 0.0
 
     def get_frequencies(self):
-        for comment in self.userObject.get_comments():
+        print "Processing User " + self.userName
+        for comment in self.userObject.get_comments(limit=self.projection.thing_limit):
             self.register_comment(comment.subreddit.display_name)
 
     def register_comment(self, subredditName):
@@ -33,7 +34,7 @@ class Projection:
     def __init__(self, subredditName):
         user_agent = ("Testing Reddit Functionality by /u/Nomopomo https://github.com/joshlemer/RedditProject")
         self.reddit = praw.Reddit(user_agent)
-        self.thing_limit = 400
+        self.thing_limit = 1000
         self.subreddit = self.reddit.get_subreddit(subredditName)
         self.comments = {}
         self.subredditFrequencies = {}
@@ -77,7 +78,7 @@ class Projection:
                 newUser.get_frequencies()
                 self.commentors.append(newUser)
 
-myProj = Projection('Technology')
+myProj = Projection('Anarcho_Capitalism')
 
 myProj.get_comments()
 
@@ -85,9 +86,22 @@ myProj.get_commentor_frequencies()
 
 myProj.register_subreddit_frequencies()
 
-print myProj.subredditFrequencies
+myList = []
+for key, value in myProj.subredditFrequencies.iteritems():
+    temp = [key, value]
+    myList.append(temp)
 
-print sorted(myProj.subredditFrequencies.iteritems(), key=operator.itemgetter(1))
+myList = sorted(myList, key=operator.itemgetter(1),reverse=True)
+
+for item in myList:
+    print "%s   %s" % (item[0], item[1])
+
+
+
+#print myProj.subredditFrequencies
+#print sorted(myProj.subredditFrequencies.iteritems(), key=operator.itemgetter(1))
+
+
 
 
 
