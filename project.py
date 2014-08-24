@@ -1,5 +1,6 @@
 import praw
 import operator
+import time
 
 class User:
     def __init__(self,projection, user):
@@ -29,7 +30,7 @@ class Projection:
     def __init__(self, subredditName):
         user_agent = ("Testing Reddit Functionality by /u/Nomopomo https://github.com/joshlemer/RedditProject")
         self.reddit = praw.Reddit(user_agent)
-        self.thing_limit = 300
+        self.thing_limit = 10
         self.subreddit = self.reddit.get_subreddit(subredditName)
         self.comments = {}
         self.subredditFrequencies = {}
@@ -98,7 +99,7 @@ def run_Analysis():
 
     myList = sorted(myList, key=operator.itemgetter(1),reverse=True)
 
-    file = open(subreddit + ".txt", "w")
+    file = open(subreddit + "_" + time.strftime("%Y-%m-%d") + "_" + time.strftime("%X") + ".txt", "w")
     for item in myList:
         file.write("%s   %s\n" % (item[0], item[1]))
 
