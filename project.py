@@ -2,6 +2,36 @@ import praw
 import operator
 import time
 
+class Frequencies:
+    def __init__(self):
+        self.frequencies = {}
+
+    def add_frequency(self, key, value):
+        if key in self.frequencies:
+            self.frequencies[key] += value
+        else:
+            self.frequencies[key] = value
+
+    def add_by_frequencies(self,frequencies):
+        for key in frequencies.frequencies:
+            self.add_frequency(key, frequencies.frequencies[key])
+
+    def multiply_frequency(self, key, value):
+        if key in self.frequencies:
+            self.frequencies[key] *= value
+        else:
+            self.frequencies[key] = 0.0
+
+    def multiply_by_frequencies(self, frequencies):
+        for key in frequencies.frequencies:
+            self.multiply_frequency(key, frequencies.frequencies[key])
+
+    def multiply_by_scalar(self, scalar):
+        for key in self.frequencies:
+            self.multiply_frequency(key,scalar)
+
+
+
 class User:
     def __init__(self,projection, user):
         self.userName = str(user.name)
@@ -9,6 +39,7 @@ class User:
         self.userObject = user
         self.projection = projection
         self.totalComments = 0.0
+
 
     def get_frequencies(self):
         print "Processing User " + self.userName
@@ -30,7 +61,7 @@ class Projection:
     def __init__(self, subredditName):
         user_agent = ("Testing Reddit Functionality by /u/Nomopomo https://github.com/joshlemer/RedditProject")
         self.reddit = praw.Reddit(user_agent)
-        self.thing_limit = 10
+        self.thing_limit = 300
         self.subreddit = self.reddit.get_subreddit(subredditName)
         self.comments = {}
         self.subredditFrequencies = {}
@@ -83,8 +114,16 @@ class Projection:
                 newUser.get_frequencies()
                 self.commentors.append(newUser)
 
+    def create_list(self):
+        self.results_list = []
+        for key, value in self.subredditFrequencies.iteritems():
+            temp = [key,value]
+            self.results_list.append(temp)
+
+        self.results_list = sorted(self.results_list, key=operator.itemgetter(1),reverse=True)
+
 def run_Analysis():
-    subreddit = 'frozen'
+    subreddit = 'bitcoin'
     myProj = Projection(subreddit)
     myProj.get_comments()
     myProj.get_commentor_frequencies()
@@ -105,7 +144,8 @@ def run_Analysis():
 
     file.close()
 
-run_Analysis()
+
+#run_Analysis()
 
 
 
