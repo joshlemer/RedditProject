@@ -35,7 +35,7 @@ class Frequencies:
 class User:
     def __init__(self,projection, user):
         self.userName = str(user.name)
-        self.subredditFrequencies = {}
+        self.subredditFrequencies = Frequencies()
         self.userObject = user
         self.projection = projection
         self.totalComments = 0.0
@@ -44,24 +44,18 @@ class User:
     def get_frequencies(self):
         print "Processing User " + self.userName
         for comment in self.userObject.get_comments(limit=self.projection.thing_limit):
-            self.register_comment(str(comment.subreddit.display_name.strip(' ').lower()))
+            self.subredditFrequencies.add_frequency(str(comment.subreddit.display_name.strip(' ').lower()), 1.0)
 
-    def register_comment(self, subredditName):
-        if str(subredditName.strip(' ').lower()) in self.subredditFrequencies:
-            self.subredditFrequencies[str(subredditName.strip(' ').lower())] += 1
-        else:
-            self.subredditFrequencies[str(subredditName.strip(' ').lower())] = 1
+            if str(comment.subreddit.display_name.strip(' ').lower()) is str(self.projection.subreddit.display_name.strip(' ').lower()):
+                self.projection.totalComments += 1
 
-        if str(subredditName.strip(' ').lower()) is str(self.projection.subreddit.display_name.strip(' ').lower()):
-            self.projection.totalComments += 1
-
-        self.totalComments += 1
+            self.totalComments += 1
 
 class Projection:
     def __init__(self, subredditName):
         user_agent = ("Testing Reddit Functionality by /u/Nomopomo https://github.com/joshlemer/RedditProject")
         self.reddit = praw.Reddit(user_agent)
-        self.thing_limit = 300
+        self.thing_limit = 10
         self.subreddit = self.reddit.get_subreddit(subredditName)
         self.comments = {}
         self.subredditFrequencies = {}
@@ -81,7 +75,7 @@ class Projection:
 
     def register_subreddit_frequencies(self):
         for commentor in self.commentors:
-            for freq in commentor.subredditFrequencies:
+            for freq in commentor.subredditFrequencies.frequencies:
                 self.register_subreddit_frequency(freq, self.calculate_frequency(commentor, freq))
 
     def calculate_frequency(self, commentor, subreddit):
@@ -95,7 +89,7 @@ class Projection:
 
         if origSubComments is None:
             origSubComments = 0.0
-        absFreq = commentor.subredditFrequencies.get(subreddit)
+        absFreq = commentor.subredditFrequencies.frequencies.get(subreddit)
         if absFreq is None:
             absFreq = 0.0
 
@@ -145,7 +139,7 @@ def run_Analysis():
     file.close()
 
 
-#run_Analysis()
+run_Analysis()
 
 
 
