@@ -24,21 +24,12 @@ class User:
             self.projection.totalComments += 1
 
         self.totalComments += 1
-        """
-        print "THIS IS REGISTERING"
-        print subredditName.strip(' ').lower() + " " + self.projection.subreddit.display_name.strip(' ').lower()
-        print subredditName
-        print self.subredditFrequencies
-        else:
-        print subredditName.strip(' ').lower() + " " + self.projection.subreddit.display_name.strip(' ').lower()
-        """
-
 
 class Projection:
     def __init__(self, subredditName):
         user_agent = ("Testing Reddit Functionality by /u/Nomopomo https://github.com/joshlemer/RedditProject")
         self.reddit = praw.Reddit(user_agent)
-        self.thing_limit = 100
+        self.thing_limit = 300
         self.subreddit = self.reddit.get_subreddit(subredditName)
         self.comments = {}
         self.subredditFrequencies = {}
@@ -77,11 +68,14 @@ class Projection:
             absFreq = 0.0
 
         result = ((origSubComments + 0.0)/len(self.comments)) * ((0.0 + absFreq) / commentor.totalComments)
-        print "%s %s %s %s %s" % (origSubComments, len(self.comments), absFreq, commentor.totalComments, result)
+        #print "%s %s %s %s %s" % (origSubComments, len(self.comments), absFreq, commentor.totalComments, result)
         return result
 
     def get_commentor_frequencies(self):
+        i = 0
         for comment in self.comments:
+            i += 1
+            print "On comment %d / %d" % (i, self.thing_limit)
             if str(comment.author) not in self.commentorNames:
                 self.commentorNames.append(str(comment.author))
                 newUser = User(self,comment.author)
@@ -89,14 +83,10 @@ class Projection:
                 self.commentors.append(newUser)
 
 def run_Analysis():
-    #theSubreddit = 'Anarcho_CapiTALism'
-
-    myProj = Projection('Bonsai')
-
+    subreddit = 'frozen'
+    myProj = Projection(subreddit)
     myProj.get_comments()
-
     myProj.get_commentor_frequencies()
-
     myProj.register_subreddit_frequencies()
 
     myList = []
@@ -108,15 +98,13 @@ def run_Analysis():
 
     myList = sorted(myList, key=operator.itemgetter(1),reverse=True)
 
+    file = open(subreddit + ".txt", "w")
     for item in myList:
-        print "%s   %s" % (item[0], item[1])
+        file.write("%s   %s\n" % (item[0], item[1]))
 
-    print mySum
-
+    file.close()
 
 run_Analysis()
-#print myProj.subredditFrequencies
-#print sorted(myProj.subredditFrequencies.iteritems(), key=operator.itemgetter(1))
 
 
 
