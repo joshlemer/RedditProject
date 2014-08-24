@@ -58,17 +58,15 @@ class Projection:
         self.thing_limit = 10
         self.subreddit = self.reddit.get_subreddit(subredditName)
         self.comments = {}
-        self.subredditFrequencies = {}
+        self.subredditFrequencies = Frequencies()
         self.commentors = []
         self.commentorNames = []
 
     def get_comments(self):
         self.comments = list(self.subreddit.get_comments(limit=self.thing_limit))
 
-        #print self.comments
-
     def register_subreddit_frequency (self, subredditName, frequency):
-        if subredditName in self.subredditFrequencies:
+        if subredditName in self.subredditFrequencies.frequencies:
             self.subredditFrequencies[subredditName] += frequency
         else:
             self.subredditFrequencies[subredditName] = frequency
@@ -76,12 +74,11 @@ class Projection:
     def register_subreddit_frequencies(self):
         for commentor in self.commentors:
             for freq in commentor.subredditFrequencies.frequencies:
-                self.register_subreddit_frequency(freq, self.calculate_frequency(commentor, freq))
+                self.subredditFrequencies.add_frequency(freq, self.calculate_frequency(commentor, freq))
 
     def calculate_frequency(self, commentor, subreddit):
         #(commentorComments in origSub / totalInOriginalSub) * (frequencyOfCommentorInSubreddit / totalCommenterComments)
 
-        #origSubComments = commentor.subredditFrequencies.get(str(self.subreddit.display_name).strip(' ').lower())
         origSubComments = 0
         for comment in self.comments:
             if str(commentor.userName) == str(comment.author.name):
@@ -125,7 +122,7 @@ def run_Analysis():
 
     myList = []
     mySum = 0.0
-    for key, value in myProj.subredditFrequencies.iteritems():
+    for key, value in myProj.subredditFrequencies.frequencies.iteritems():
         temp = [key, value]
         mySum += value
         myList.append(temp)
