@@ -31,6 +31,20 @@ This program also requires you install PRAW, a library used to access the Reddit
 
 And to use the program, just 
 
-    python project.py
+    python project.py YourSubredditHere 
 
-I haven’t added command line arguments yet but will soon. For now you’ll have to hardcode the subreddit you want to inspect.
+If you want to analyze more than 10 commenters and 10 of their comments each, then add an integer argument
+    
+    python project.py YourSubredditHere 100
+
+Careful though, time / requests increases proportional to the square of this number. 100 will take a minute or two, 500 - 45 minutes or so. 1000 - Go put a pot of coffee on.
+
+project.py will output a textfile in the folder with the most frequent subreddits commented in at the top, with percentages on the right.
+
+#Future features
+
+I’ll soon have an “extended user profile” feature, where you input a reddit user, and it gathers the profiles of each of their frequented communities and amalgamates them according to how much the user goes in that community. This will be really great for predicting, say, what subreddits a user would like to comment in in the future.
+
+In the not-too-distant future, I’d like to start saving the data to a database, possibly offering the software as a web service.
+
+
