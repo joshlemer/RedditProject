@@ -1,3 +1,4 @@
+import sys
 import praw
 import operator
 import time
@@ -27,10 +28,10 @@ class User:
         self.totalComments += 1
 
 class Projection:
-    def __init__(self, subredditName):
+    def __init__(self, subredditName, thing_limit):
         user_agent = ("Testing Reddit Functionality by /u/Nomopomo https://github.com/joshlemer/RedditProject")
         self.reddit = praw.Reddit(user_agent)
-        self.thing_limit = 10
+        self.thing_limit = thing_limit
         self.subreddit = self.reddit.get_subreddit(subredditName)
         self.comments = {}
         self.subredditFrequencies = {}
@@ -83,9 +84,8 @@ class Projection:
                 newUser.get_frequencies()
                 self.commentors.append(newUser)
 
-def run_Analysis():
-    subreddit = 'frozen'
-    myProj = Projection(subreddit)
+def run_analysis(subreddit, depth):
+    myProj = Projection(subreddit, depth)
     myProj.get_comments()
     myProj.get_commentor_frequencies()
     myProj.register_subreddit_frequencies()
@@ -105,7 +105,13 @@ def run_Analysis():
 
     file.close()
 
-run_Analysis()
+
+#run_Analysis()
+if len(sys.argv) >= 2:
+    if len(sys.argv) >= 3:
+        run_analysis(sys.argv[1], int(sys.argv[2]))
+    else:
+        run_analysis(sys.argv[1], 10)
 
 
 
