@@ -4,8 +4,8 @@ import operator
 import time
 
 class Frequencies:
-    def __init__(self):
-        self.frequencies = {}
+    def __init__(self, frequencies={}):
+        self.frequencies = frequencies
 
     def add_frequency(self, key, value):
         if key in self.frequencies:
@@ -33,25 +33,82 @@ class Frequencies:
 
 
 class User:
-    def __init__(self,projection, user):
+    def __init__(self,subreddit, user):
+        self.thing_limit = 10
         self.userName = str(user.name)
         self.subredditFrequencies = Frequencies()
+        self.userFrequencies = Frequencies()
         self.userObject = user
-        self.projection = projection
+        self.subreddit = subreddit
+        self.comments = []
+        self.subreddits = []
         self.totalComments = 0.0
 
 
     def get_frequencies(self):
         print "Processing User " + self.userName
-        for comment in self.userObject.get_comments(limit=self.projection.thing_limit):
+        for comment in self.userObject.get_comments(limit=self.thing_limit):
             self.subredditFrequencies.add_frequency(str(comment.subreddit.display_name.strip(' ').lower()), 1.0)
 
-            if str(comment.subreddit.display_name.strip(' ').lower()) is str(self.projection.subreddit.display_name.strip(' ').lower()):
-                self.projection.totalComments += 1
+            if(self.subreddit):
+                if str(comment.subreddit.display_name.strip(' ').lower()) is str(self.projection.subreddit.display_name.strip(' ').lower()):
+                    self.subreddit.totalComments += 1
 
             self.totalComments += 1
 
+    def get_comments(self):
+        self.comments = list(self.userObject.get_comments(limit=self.thing_limit))
+        for comment in self.comments:
+            self.subredditFrequencies.add_frequency(str(comment.subreddit.display_name.strip(' ').lower()), 1.0)
+
+    def register_user_frequencies(self):
+        for subreddit in self.subreddits:
+            for freq in subreddit.userFrequencies.frequencies:
+                self.userFrequencies.add_frequency(freq, self.calculate_frequency(subreddit, freq))
+
+    def calculate_frequency(self, commentor, subreddit):
+        #(subredditComments from originalUser / total originalUser comments) * (frequencyOfSubredditInUser / totalSubredditComments)
+
+        origSubComments = 0
+        for comment in self.comments:
+            if str(commentor.userName) == str(comment.author.name):
+                origSubComments += 1
+
+        if origSubComments is None:
+            origSubComments = 0.0
+        absFreq = commentor.subredditFrequencies.frequencies.get(subreddit)
+        if absFreq is None:
+            absFreq = 0.0
+
+        result = ((origSubComments + 0.0)/len(self.comments)) * ((0.0 + absFreq) / commentor.totalComments)
+        #print "%s %s %s %s %s" % (origSubComments, len(self.comments), absFreq, commentor.totalComments, result)
+        return result
+
+    def get_subreddit_frequencies(self):
+        i = 0
+        for subreddit in self.subreddits:
+            i += 1
+            print "On subreddit %d / %d" % (i, self.thing_limit)
+            if str(subreddit.display_name) not in self.subredditFrequencies.frequencies:
+                self.subredditFrequencies.add_frequency(str(subreddit.display_name.strip(' ').lower()))
+                newSubreddit = Subreddit(self, str(subreddit.display_name.strip(' ').lower()))
+                newSubreddit.get__frequencies()
+                self.subreddits.append(newSubreddit)
+
+
+
+
 class Projection:
+    def __init__(self, center, outers):
+        self.center_frequencies = Frequencies()
+        self.center_name = ""
+        self.outer_objects = {}
+        self.outer_object_names = []
+        self.object_weights = {}
+
+
+
+class Subreddit:
     def __init__(self, subredditName, thing_limit):
         user_agent = ("Testing Reddit Functionality by /u/Nomopomo https://github.com/joshlemer/RedditProject")
         self.reddit = praw.Reddit(user_agent)
@@ -64,12 +121,6 @@ class Projection:
 
     def get_comments(self):
         self.comments = list(self.subreddit.get_comments(limit=self.thing_limit))
-
-    def register_subreddit_frequency (self, subredditName, frequency):
-        if subredditName in self.subredditFrequencies.frequencies:
-            self.subredditFrequencies[subredditName] += frequency
-        else:
-            self.subredditFrequencies[subredditName] = frequency
 
     def register_subreddit_frequencies(self):
         for commentor in self.commentors:
@@ -106,7 +157,7 @@ class Projection:
                 self.commentors.append(newUser)
 
 def run_analysis(subreddit, depth):
-    myProj = Projection(subreddit, depth)
+    myProj = Subreddit(subreddit, depth)
     myProj.get_comments()
     myProj.get_commentor_frequencies()
     myProj.register_subreddit_frequencies()
