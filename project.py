@@ -33,12 +33,13 @@ class Frequencies:
 
 
 class User:
-    def __init__(self,projection, user):
+    def __init__(self,projection, user, user_limit):
         self.userName = str(user.name)
         self.subredditFrequencies = Frequencies()
         self.userObject = user
         self.projection = projection
         self.totalComments = 0.0
+        self.user_limit = user_limit
 
 
     def get_frequencies(self):
@@ -52,7 +53,7 @@ class User:
             self.totalComments += 1
 
 class Projection:
-    def __init__(self, subredditName, thing_limit):
+    def __init__(self, subredditName, thing_limit, user_limit):
         user_agent = ("Testing Reddit Functionality by /u/Nomopomo https://github.com/joshlemer/RedditProject")
         self.reddit = praw.Reddit(user_agent)
         self.thing_limit = thing_limit
@@ -61,6 +62,7 @@ class Projection:
         self.subredditFrequencies = Frequencies()
         self.commentors = []
         self.commentorNames = []
+        self.user_limit = user_limit
 
     def get_comments(self):
         self.comments = list(self.subreddit.get_comments(limit=self.thing_limit))
@@ -101,12 +103,12 @@ class Projection:
             print "On comment %d / %d" % (i, self.thing_limit)
             if str(comment.author) not in self.commentorNames:
                 self.commentorNames.append(str(comment.author))
-                newUser = User(self,comment.author)
+                newUser = User(self,comment.author, self.user_limit)
                 newUser.get_frequencies()
                 self.commentors.append(newUser)
 
-def run_analysis(subreddit, depth):
-    myProj = Projection(subreddit, depth)
+def run_analysis(subreddit, depth, width):
+    myProj = Projection(subreddit, depth, width)
     myProj.get_comments()
     myProj.get_commentor_frequencies()
     myProj.register_subreddit_frequencies()
@@ -129,9 +131,12 @@ def run_analysis(subreddit, depth):
 
 if len(sys.argv) >= 2:
     if len(sys.argv) >= 3:
-        run_analysis(sys.argv[1], int(sys.argv[2]))
+        if len(sys.argv) >= 4:
+            run_analysis(sys.argv[1], int(sys.argv[2]), int(sys.argv[3]))
+        else:
+            run_analysis(sys.argv[1], int(sys.argv[2]), int(sys.argv[2]))
     else:
-        run_analysis(sys.argv[1], 10)
+        run_analysis(sys.argv[1], 10, 10)
 
 
 
