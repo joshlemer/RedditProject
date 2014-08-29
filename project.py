@@ -31,6 +31,28 @@ class Frequencies:
         for key in self.frequencies:
             self.multiply_frequency(key,scalar)
 
+    def divide_frequency(self, key, value):
+        if key in self.frequencies:
+            if value != 0:
+                if self.frequencies[key] == 0:
+                    self.frequencies[key] = 1.0
+                else:
+                    self.frequencies[key] /= (0.0 + value)
+            else:
+                if self.frequencies[key] == 0:
+                    self.frequencies[key] = 1.0
+                else:
+                    self.frequencies[key] = float('inf')
+        else:
+            if value > 0:
+                self.frequencies[key] = 0.0
+            else:
+                self.frequencies[key] = 1.0
+
+    def divide_by_frequencies(self, frequencies):
+        for key in frequencies.frequencies:
+            self.divide_frequency(self, key, frequencies.frequencies[key])
+
 
 class User:
     def __init__(self,projection, user):
@@ -81,7 +103,7 @@ class Projection:
 
         origSubComments = 0
         for comment in self.comments:
-            if str(commentor.userName) == str(comment.author.name):
+            if comment is not None and hasattr(comment,'author') and comment.author is not None and hasattr(comment.author, 'name') and comment.author.name is not None and str(commentor.userName) == str(comment.author.name):
                 origSubComments += 1
 
         if origSubComments is None:
@@ -99,7 +121,7 @@ class Projection:
         for comment in self.comments:
             i += 1
             print "On comment %d / %d" % (i, self.thing_limit)
-            if str(comment.author) not in self.commentorNames:
+            if comment is not None and hasattr(comment, 'author') and hasattr(comment.author, 'name') and str(comment.author) not in self.commentorNames:
                 self.commentorNames.append(str(comment.author))
                 newUser = User(self,comment.author)
                 newUser.get_frequencies()
@@ -126,10 +148,53 @@ def run_analysis(subreddit, depth):
 
     file.close()
 
+def run_diff_analysis(subredditA, subredditB, depth):
+    projA = Projection(subredditA, depth)
+    projA.get_comments()
+    projA.get_commentor_frequencies()
+    projA.register_subreddit_frequencies()
+
+    projB = Projection(subredditB, depth)
+    projB.get_comments()
+    projB.get_commentor_frequencies()
+    projB.register_subreddit_frequencies()
+
+    diff_freqs = Frequencies()
+    negative_B_freqs = Frequencies()
+
+    negative_B_freqs.add_by_frequencies(projB.subredditFrequencies)
+    negative_B_freqs.multiply_by_scalar(-1)
+
+    diff_freqs.add_by_frequencies(projA.subredditFrequencies)
+    diff_freqs.add_by_frequencies(negative_B_freqs)
+
+
+    myList = []
+    mySum = 0.0
+    for key, value in diff_freqs.frequencies.iteritems():
+        temp = [key, value]
+        mySum += value
+        myList.append(temp)
+
+    myList = sorted(myList, key=operator.itemgetter(1),reverse=True)
+
+    file = open(subredditA + "-" + subredditB + "_" + time.strftime("%Y-%m-%d") + "_" + time.strftime("%X") + ".txt", "w")
+    for item in myList:
+        file.write("%s   %s\n" % (item[0], item[1]))
+
+    file.close()
+
+
+
+
+
 
 if len(sys.argv) >= 2:
     if len(sys.argv) >= 3:
-        run_analysis(sys.argv[1], int(sys.argv[2]))
+        if len(sys.argv) >= 4:
+            run_diff_analysis(sys.argv[1], sys.argv[2],int(sys.argv[3]))
+        else:
+            run_analysis(sys.argv[1], int(sys.argv[2]))
     else:
         run_analysis(sys.argv[1], 10)
 
