@@ -51,7 +51,7 @@ class Frequencies:
 
     def divide_by_frequencies(self, frequencies):
         for key in frequencies.frequencies:
-            self.divide_frequency(self, key, frequencies.frequencies[key])
+            self.divide_frequency(key, frequencies.frequencies[key])
 
 
 class User:
@@ -184,6 +184,38 @@ def run_diff_analysis(subredditA, subredditB, depth):
 
     file.close()
 
+def run_percent_analysis(subredditA, subredditB, depth):
+    projA = Projection(subredditA, depth)
+    projA.get_comments()
+    projA.get_commentor_frequencies()
+    projA.register_subreddit_frequencies()
+
+    projB = Projection(subredditB, depth)
+    projB.get_comments()
+    projB.get_commentor_frequencies()
+    projB.register_subreddit_frequencies()
+
+    percent_freqs = Frequencies()
+
+
+    percent_freqs.add_by_frequencies(projA.subredditFrequencies)
+    percent_freqs.divide_by_frequencies(projB.subredditFrequencies)
+
+
+    myList = []
+    mySum = 0.0
+    for key, value in percent_freqs.frequencies.iteritems():
+        temp = [key, value]
+        mySum += value
+        myList.append(temp)
+
+    myList = sorted(myList, key=operator.itemgetter(1),reverse=True)
+
+    file = open(subredditA + "-percent-of" + subredditB + "_" + time.strftime("%Y-%m-%d") + "_" + time.strftime("%X") + ".txt", "w")
+    for item in myList:
+        file.write("%s   %s\n" % (item[0], item[1]))
+
+    file.close()
 
 
 
@@ -192,7 +224,7 @@ def run_diff_analysis(subredditA, subredditB, depth):
 if len(sys.argv) >= 2:
     if len(sys.argv) >= 3:
         if len(sys.argv) >= 4:
-            run_diff_analysis(sys.argv[1], sys.argv[2],int(sys.argv[3]))
+            run_percent_analysis(sys.argv[1], sys.argv[2],int(sys.argv[3]))
         else:
             run_analysis(sys.argv[1], int(sys.argv[2]))
     else:
