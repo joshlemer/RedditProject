@@ -65,13 +65,19 @@ class User:
 
     def get_frequencies(self):
         print "Processing User " + self.userName
-        for comment in self.userObject.get_comments(limit=self.projection.thing_limit):
-            self.subredditFrequencies.add_frequency(str(comment.subreddit.display_name.strip(' ').lower()), 1.0)
+        while True:
+            try:
+                #for comment in self.userObject.get_comments(limit=100):
+                for comment in self.userObject.get_comments(limit=self.projection.thing_limit):
+                    self.subredditFrequencies.add_frequency(str(comment.subreddit.display_name.strip(' ').lower()), 1.0)
+                    if str(comment.subreddit.display_name.strip(' ').lower()) is str(self.projection.subreddit.display_name.strip(' ').lower()):
+                        self.projection.totalComments += 1
+                    self.totalComments += 1
+                break
+            except:
+                print "error..."
 
-            if str(comment.subreddit.display_name.strip(' ').lower()) is str(self.projection.subreddit.display_name.strip(' ').lower()):
-                self.projection.totalComments += 1
 
-            self.totalComments += 1
 
 class Projection:
     def __init__(self, subredditName, thing_limit):
@@ -85,7 +91,12 @@ class Projection:
         self.commentorNames = []
 
     def get_comments(self):
-        self.comments = list(self.subreddit.get_comments(limit=self.thing_limit))
+        while True:
+            try:
+                self.comments = list(self.subreddit.get_comments(limit=self.thing_limit))
+                break
+            except:
+                print "error..."
 
     def register_subreddit_frequency (self, subredditName, frequency):
         if subredditName in self.subredditFrequencies.frequencies:
