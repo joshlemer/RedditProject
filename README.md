@@ -37,9 +37,29 @@ If you want to analyze more than 10 commenters and 10 of their comments each, th
     
     python project.py YourSubredditHere 100
 
-Careful though, time / requests increases proportional to the square of this number. 100 will take a minute or two, 500 - 45 minutes or so. 1000 - Go put a pot of coffee on.
+This will result in 100 of the previous comments being analyzed, and 100 of each commenter’s other comments being analyzed for a total of 100 x 100 = 10000 comments (assuming no repeat commenters).
+Careful though, time / requests increases proportional to the square of this number. 100 will take a minute or two, 500 - 45 minutes or so. 1000 - go put a pot of coffee on.
 
 project.py will output a textfile in the folder with the most frequent subreddits commented in at the top, with percentages on the right.
+
+You can also compare two communities, or one community against reddit as a whole, by using 3 arguments:
+
+    python project.py AskReddit all 300
+
+This will give a contrast between AskReddit commenters and general reddit commenters (/r/all is the combination of all subreddits).
+Or you can contrast two specific communities:
+
+    python project.py javascript python 400
+
+This will output a text file with a list of communities and a number beside it, such as
+    JavaScript  10001.4394
+    Java    1.24
+    Ruby    0.54
+
+The way to interpret these results is that Javascript commenters are 10001.4394 times as likely to post in /r/JavaScript as Python commenters are.
+JavaScript commenters are 24% more likely to post in Java than Python commenters are, but that Javascript commenters are only 54% as likely to post in /r/Ruby as python commenters are.
+
+
 
 #Future features
 
