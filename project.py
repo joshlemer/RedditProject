@@ -55,9 +55,13 @@ class Frequencies:
 
 
 class User:
-    def __init__(self,projection, user):
-        self.userName = str(user.name)
+    def __init__(self,projection, user, userName=None):
+        if user:
+            self.userName = str(user.name)
+        elif userName:
+            self.userName = userName
         self.subredditFrequencies = Frequencies()
+        self.extendedFrequencies = Frequencies()
         self.userObject = user
         self.projection = projection
         self.totalComments = 0.0
@@ -77,11 +81,23 @@ class User:
             except:
                 print "error..."
 
+    def get_extended_profile(self):
+        for subreddit in self.subredditFrequencies.frequencies:
+            if self.subredditFrequencies.frequencies[subreddit] > 0.1:
+                subProj = Projection(subreddit, 100)
+                subProj.get_comments()
+                subProj.get_commentor_frequencies()
+                subProj.register_subreddit_frequencies()
+
+                self.extendedFrequencies.add_by_frequencies(subProj.frequencies)
+
+
+
 
 
 class Projection:
     def __init__(self, subredditName, thing_limit):
-        user_agent = ("Testing Reddit Functionality by /u/Nomopomo https://github.com/joshlemer/RedditProject")
+        user_agent = ("Testing Reddit Functionality by /u/Reddit_Projector https://github.com/joshlemer/RedditProject")
         self.reddit = praw.Reddit(user_agent)
         self.thing_limit = thing_limit
         self.subreddit = self.reddit.get_subreddit(subredditName)
