@@ -1,0 +1,194 @@
+import praw
+import scipy as sp
+import numpy as np
+import sys
+import operator
+import time
+import project as p
+import matplotlib.pyplot as plt
+import scipy.cluster.hierarchy as hi
+
+class histogram:
+    def __init__(self, dictionary=None):
+        self.frequencies = {}
+        if dictionary is not None:
+            self.frequencies = dictionary
+
+    def add_frequency(self, key, value):
+        if key in self.frequencies:
+            self.frequencies[key] += value
+        else:
+            self.frequencies[key] = value
+
+    def add_by_frequencies(self,frequencies):
+        for key in frequencies.frequencies:
+            self.add_frequency(key, frequencies.frequencies[key])
+
+    def multiply_frequency(self, key, value):
+        if key in self.frequencies:
+            self.frequencies[key] *= value
+        else:
+            self.frequencies[key] = 0.0
+
+    def multiply_by_frequencies(self, frequencies):
+        for key in frequencies.frequencies:
+            self.multiply_frequency(key, frequencies.frequencies[key])
+
+    def multiply_by_scalar(self, scalar):
+        for key in self.frequencies:
+            self.multiply_frequency(key,scalar)
+
+    def divide_frequency(self, key, value):
+        if key in self.frequencies:
+            if value != 0:
+                if self.frequencies[key] == 0:
+                    self.frequencies[key] = 1.0
+                else:
+                    self.frequencies[key] /= (0.0 + value)
+            else:
+                if self.frequencies[key] == 0:
+                    self.frequencies[key] = 1.0
+                else:
+                    self.frequencies[key] = float('inf')
+        else:
+            if value > 0:
+                self.frequencies[key] = 0.0
+            else:
+                self.frequencies[key] = 1.0
+
+    def divide_by_frequencies(self, frequencies):
+        for key in frequencies.frequencies:
+            self.divide_frequency(key, frequencies.frequencies[key])
+
+
+class comment:
+    def __init__(self, comment):
+        if comment is not None and hasattr(comment,'author') and comment.author is not None and hasattr(comment.author, 'name'):
+            self.author_name = comment.author.name
+        else:
+            self.author_name = ''
+
+        self.subreddit = str(comment.subreddit.display_name.strip(' ').lower())
+
+class user:
+    @staticmethod
+    def get_histogram(comments, author_name):
+        total_comments_by_author = 0
+        the_histogram = histogram()
+        for comment in comments:
+            if comment.author_name == author_name:
+                total_comments_by_author += 1
+                the_histogram.add_frequency(comment.subreddit, 1)
+        the_histogram.multiply_by_scalar(1.0 / total_comments_by_author)
+        return the_histogram.frequencies
+
+class community:
+    @staticmethod
+    def get_histogram(comments, subreddit_name):
+        total_comments_in_subreddit = 0
+        the_histogram = histogram()
+        for comment in comments:
+            if comment.subreddit == subreddit_name:
+                total_comments_in_subreddit += 1
+                the_histogram.add_frequency(comment.author_name, 1)
+        the_histogram.multiply_by_scalar(1.0 / total_comments_in_subreddit)
+        return the_histogram.frequencies
+
+
+user_agent = ("Testing Reddit Functionality by /u/Reddit_Projector https://github.com/joshlemer/RedditProject")
+reddit = praw.Reddit(user_agent)
+subredditName = 'all'
+subreddit_object = reddit.get_subreddit(subredditName)
+
+
+x = 5
+y = 5
+z = 100
+comments = [comment(a) for a in subreddit_object.get_comments(limit=x)]
+x_comments = [comment(a) for a in subreddit_object.get_comments(limit=x)]
+x_subs = []
+i = 0
+for c in x_comments:
+    print "x = ", i
+    if c.subreddit not in x_subs:
+        x_subs.append(c.subreddit)
+    i += 1
+
+y_comments = []
+i = 0
+for x_sub in x_subs:
+    print "y = ", i
+    subreddit_object = reddit.get_subreddit(x_sub)
+    y_comments += [comment(a) for a in subreddit_object.get_comments(limit=y)]
+    i += 1
+
+z_comments = []
+i = 0
+for y_com in y_comments:
+    print "z = ", i
+    z_comments += [comment(a) for a in reddit.get_redditor(y_com.author_name).get_comments(limit=z)]
+    i += 1
+
+comments = list(z_comments)
+print "COMMENTS LENGTH: ", len(comments)
+
+users = {}
+for comment in comments:
+    if comment.author_name not in users:
+        users[comment.author_name] = user.get_histogram(comments, comment.author_name)
+
+#for c in comments:
+#    print "%s\t%s" % (c.author_name, c.subreddit)
+
+#print users
+
+
+subreddits = {}
+for comment in comments:
+    if comment.subreddit not in subreddits:
+        subreddits[comment.subreddit] = community.get_histogram(comments, comment.subreddit)
+
+#print subreddits
+
+sub_relatedness = {}
+for sub in subreddits:
+    sub_histogram = histogram()
+    for user in subreddits[sub]:
+        user_histogram = histogram(users[user])
+        user_histogram.multiply_by_scalar(subreddits[sub][user])
+
+        sub_histogram.add_by_frequencies(user_histogram)
+    sub_relatedness[sub] = sub_histogram.frequencies
+
+print sub_relatedness
+
+for u in sub_relatedness:
+    if len(sub_relatedness[u]) != 1:
+        print u, sub_relatedness[u]
+
+subreddit_names = [x for x in subreddits]
+print subreddit_names
+subreddit_rows = []
+for sub in subreddit_names:
+    sub_row = []
+    for sub_name in subreddit_names:
+        if sub_name in sub_relatedness[sub]:
+            sub_row.append(sub_relatedness[sub][sub_name])
+        else:
+            sub_row.append(float(0))
+    subreddit_rows.append(sub_row)
+print subreddit_rows
+
+b = sp.spatial.distance.pdist(subreddit_rows, 'euclidean')
+c = hi.linkage(b,method='single', metric='euclidean')
+hi.dendrogram(c, labels=subreddit_names)
+plt.show()
+
+
+
+
+
+
+
+
+
