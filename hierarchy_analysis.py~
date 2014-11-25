@@ -103,7 +103,7 @@ subreddit_object = reddit.get_subreddit(subredditName)
 
 
 x = 5
-y = 5
+y = 25
 z = 100
 comments = [comment(a) for a in subreddit_object.get_comments(limit=x)]
 x_comments = [comment(a) for a in subreddit_object.get_comments(limit=x)]
@@ -177,7 +177,7 @@ subreddit_rows = []
 #for sub in subreddit_names:
 for sub in x_subs:
     sub_row = []
-    for sub_name in subreddit_names:
+    for sub_name in subreddit_names:       
 	if sub_name in sub_relatedness[sub]:
             sub_row.append(sub_relatedness[sub][sub_name])
         else:
