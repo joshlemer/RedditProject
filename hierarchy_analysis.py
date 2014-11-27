@@ -1,19 +1,26 @@
 import praw
 import scipy as sp
-import numpy as np
-import sys
-import operator
-import time
-import project as p
+#import numpy as np
+#import sys
+#import operator
+#import time
+#import project as p
 import matplotlib.pyplot as plt
 import scipy.cluster.hierarchy as hi
 import pickle
+import copy
 
 class histogram:
     def __init__(self, dictionary=None):
         self.frequencies = {}
         if dictionary is not None:
-            self.frequencies = dictionary
+            self.frequencies = copy.deepcopy(dictionary)
+
+    def get_sum(self):
+        the_sum = 0
+        for e in self.frequencies:
+            the_sum += self.frequencies[e]
+        return the_sum
 
     def add_frequency(self, key, value):
         if key in self.frequencies:
@@ -81,6 +88,7 @@ class user:
                 total_comments_by_author += 1
                 the_histogram.add_frequency(comment.subreddit, 1)
         the_histogram.multiply_by_scalar(1.0 / total_comments_by_author)
+        #print author_name, " ", the_histogram.get_sum()
         return the_histogram.frequencies
 
 class community:
@@ -103,7 +111,7 @@ subreddit_object = reddit.get_subreddit(subredditName)
 
 
 x = 5
-y = 5
+y = 15
 z = 100
 comments = [comment(a) for a in subreddit_object.get_comments(limit=x)]
 x_comments = [comment(a) for a in subreddit_object.get_comments(limit=x)]
@@ -125,10 +133,14 @@ for x_sub in x_subs:
     i += 1
 
 z_comments = []
+redditors = []
 i = 0
 for y_com in y_comments:
     print "z = ", i
-    z_comments += [comment(a) for a in reddit.get_redditor(y_com.author_name).get_comments(limit=z)]
+    redditor = y_com.author_name
+    if redditor not in redditors:
+        z_comments += [comment(a) for a in reddit.get_redditor(y_com.author_name).get_comments(limit=z)]
+        redditors.append(redditor)
     i += 1
 
 comments = list(z_comments)
@@ -148,6 +160,7 @@ for comment in comments:
 #print users
 
 
+#Will be of form {'sub_A': {'user_A':0.5, 'user_B': 0.5}, 'sub_B':{...}}
 subreddits = {}
 for comment in comments:
     if comment.subreddit not in subreddits:
@@ -156,23 +169,38 @@ for comment in comments:
 #print subreddits
 
 sub_relatedness = {}
-for sub in subreddits:
+for sub in x_subs:
     sub_histogram = histogram()
     for user in subreddits[sub]:
         user_histogram = histogram(users[user])
+        print user, ' ', user_histogram.get_sum()
         user_histogram.multiply_by_scalar(subreddits[sub][user])
 
         sub_histogram.add_by_frequencies(user_histogram)
     sub_relatedness[sub] = sub_histogram.frequencies
 
+print "SubredditsRelatedness:"
 print sub_relatedness
+for s in sub_relatedness:
+    s_sum= 0
+    for t in sub_relatedness[s]:
+        s_sum += sub_relatedness[s][t]
+    print s, ' ', s_sum
+    if s_sum != 1.0:
+        print subreddits[s]
+        for u in subreddits[s]:
+            print u, users[u]
 
+#print sub_relatedness
+
+"""
 for u in sub_relatedness:
     if len(sub_relatedness[u]) != 1:
         print u, sub_relatedness[u]
+"""
 
-subreddit_names = [x for x in subreddits]
-print subreddit_names
+subreddit_names = [w for w in subreddits]
+#print subreddit_names
 subreddit_rows = []
 #for sub in subreddit_names:
 for sub in x_subs:
@@ -183,19 +211,27 @@ for sub in x_subs:
         else:
             sub_row.append(float(0))
     subreddit_rows.append(sub_row)
-print subreddit_rows
+#print subreddit_rows
 
 b = sp.spatial.distance.pdist(subreddit_rows, 'euclidean')
 print "spatial distances calculated"
 c = hi.linkage(b,method='single', metric='euclidean')
 print "linkages calculated"
 hi.dendrogram(c,labels=x_subs)
+plt.title("Using min-distance merging")
 plt.show()
 
 c = hi.linkage(b,method='complete', metric='euclidean')
 print "linkages calculated"
 hi.dendrogram(c,labels=x_subs)
+plt.title("Using max-distance merging")
 plt.show()
+
+for row in subreddit_rows:
+    row_sum = 0
+    for elem in row:
+        row_sum += elem
+    print row_sum
 
 
 
