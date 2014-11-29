@@ -166,6 +166,7 @@ import sklearn.preprocessing
 subreddit_rows = sklearn.preprocessing.normalize(subreddit_rows)
 
 b = sp.spatial.distance.pdist(subreddit_rows, 'euclidean')
+#c = hi.linkage(b,method='complete', metric='euclidean')
 c = hi.linkage(b,method='complete', metric='euclidean')
 print "linkages calculated"
 hi.dendrogram(c,labels=x_subs,orientation='right')
@@ -174,5 +175,9 @@ plt.show()
 hi.dendrogram(c,labels=x_subs,orientation='right')
 plt.savefig('dendrogram.png')
 
-
-
+output = open('comments.pkl', 'wb')
+pickle.dump(comments,output)
+output.close()
+output = open('x_subs.pkl', 'wb')
+pickle.dump(x_subs,output)
+output.close()

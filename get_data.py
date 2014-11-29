@@ -95,11 +95,44 @@ class community:
         the_histogram.multiply_by_scalar(1.0 / total_comments_in_subreddit)
         return the_histogram.frequencies
 
-
 class data:
     def __init__(self, comments, x_subs):
         self.comments = comments
         self.x_subs = x_subs
+
+
+def add_sub_data(subredditName, num_redditors):
+    user_agent = ("Testing Reddit Functionality by /u/Reddit_Projector https://github.com/joshlemer/RedditProject")
+    reddit = praw.Reddit(user_agent)
+    subreddit_object = reddit.get_subreddit(subredditName)
+
+    the_data = pickle.load(open('data.pkl', 'rb'))
+    comments = the_data.comments
+    x_subs = the_data.x_subs
+    y_comments = [comment(a) for a in subreddit_object.get_comments(limit=num_redditors)]
+
+    z_comments = []
+    redditors = []
+    i = 0
+    for y_com in y_comments:
+        print y_com.subreddit, " z = ", i
+        redditor = y_com.author_name
+        if redditor not in redditors:
+            try:
+                z_comments += [comment(a) for a in reddit.get_redditor(y_com.author_name).get_comments(limit=100)]
+                redditors.append(redditor)
+            except:
+                print "oops, that user is weird"
+        i += 1
+
+    comments += list(z_comments)
+    print "COMMENTS LENGTH: ", len(comments)
+    the_data = data(comments, x_subs + [subredditName] )
+    output = open('data.pkl', 'wb')
+    pickle.dump(the_data,output)
+    output.close()
+
+
 
 if __name__ == "__main__":
     user_agent = ("Testing Reddit Functionality by /u/Reddit_Projector https://github.com/joshlemer/RedditProject")
@@ -120,20 +153,34 @@ if __name__ == "__main__":
         if c.subreddit not in x_subs:
             x_subs.append(c.subreddit)
         i += 1
-    x_subs = ['bitcoin',
-              'guitar',
-              'bass',
-              'socialism',
-              'conservative',
-              'libertarian',
-              'politics',
-              'linux',
-              'opensource',
-              'games',
-              'winnipeg',
-              'calgary',
-              'canada',
-              'opensourcegames']
+    x_subs = [
+              'health',
+              'fitness',
+              'xxfitness',
+              'loseit',
+              'gainit',
+              'c25k',
+              'bodyweightfitness',
+              'weightroom',
+              'progresspics',
+              'advancedfitness',
+              'nutrition',
+              'keto',
+              'paleo',
+              'bodybuilding',
+              'vegan',
+              'running',
+              'cycling',
+              'sociology',
+              'bjj',
+              'soylent',
+              'fitmeals',
+              'walking',
+              'volleyball',
+              'swimming',
+              'yoga',
+              'vegetarian'
+              ]
 
     y_comments = []
     i = 0
@@ -150,8 +197,11 @@ if __name__ == "__main__":
         print y_com.subreddit, " z = ", i
         redditor = y_com.author_name
         if redditor not in redditors:
-            z_comments += [comment(a) for a in reddit.get_redditor(y_com.author_name).get_comments(limit=z)]
-            redditors.append(redditor)
+            try:
+                z_comments += [comment(a) for a in reddit.get_redditor(y_com.author_name).get_comments(limit=z)]
+                redditors.append(redditor)
+            except:
+                print "oops, that user is weird"
         i += 1
 
     comments = list(z_comments)
@@ -160,3 +210,6 @@ if __name__ == "__main__":
     output = open('data.pkl', 'wb')
     pickle.dump(the_data,output)
     output.close()
+
+
+
