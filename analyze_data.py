@@ -146,38 +146,12 @@ for sub in x_subs:
     subreddit_rows.append(sub_row)
 #print subreddit_rows
 
-"""
-b = sp.spatial.distance.pdist(subreddit_rows, 'euclidean')
-print "spatial distances calculated"
-c = hi.linkage(b,method='single', metric='euclidean')
-print "linkages calculated"
-hi.dendrogram(c,labels=x_subs)
-plt.title("Using min-distance merging")
-plt.show()
-
-c = hi.linkage(b,method='complete', metric='euclidean')
-print "linkages calculated"
-hi.dendrogram(c,labels=x_subs)
-plt.title("Using max-distance merging")
-plt.show()
-"""
-
 import sklearn.preprocessing
 subreddit_rows = sklearn.preprocessing.normalize(subreddit_rows)
 
 b = sp.spatial.distance.pdist(subreddit_rows, 'euclidean')
-#c = hi.linkage(b,method='complete', metric='euclidean')
 c = hi.linkage(b,method='complete', metric='euclidean')
 print "linkages calculated"
 hi.dendrogram(c,labels=x_subs,orientation='right')
-plt.title("Using max-distance merging")
+plt.title("Euclidean")
 plt.show()
-hi.dendrogram(c,labels=x_subs,orientation='right')
-plt.savefig('dendrogram.png')
-
-output = open('comments.pkl', 'wb')
-pickle.dump(comments,output)
-output.close()
-output = open('x_subs.pkl', 'wb')
-pickle.dump(x_subs,output)
-output.close()
