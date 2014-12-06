@@ -101,6 +101,23 @@ class data:
         self.x_subs = x_subs
 
 
+def remove_sub_data(subredditName):
+    the_data = pickle.load(open('data.pkl', 'rb'))
+    comments = the_data.comments
+    x_subs = the_data.x_subs
+
+    comments = [x for x in comments if x.subreddit.lower() != subredditName]
+    x_subs = [x for x in x_subs if x != subredditName]
+
+    the_data = data(comments, x_subs )
+    print x_subs
+    output = open('data.pkl', 'wb')
+    pickle.dump(the_data,output)
+    output.close()
+
+
+
+
 def add_sub_data(subredditName, num_redditors):
     user_agent = ("Testing Reddit Functionality by /u/Reddit_Projector https://github.com/joshlemer/RedditProject")
     reddit = praw.Reddit(user_agent)
@@ -141,12 +158,11 @@ if __name__ == "__main__":
     subreddit_object = reddit.get_subreddit(subredditName)
 
 
-    x = 5
-    y = 100
-    z = 100
+    x = 4
+    y = 100 #Comments per subreddit inspected
+    z = 100 #Comments per user inspected
     comments = [comment(a) for a in subreddit_object.get_comments(limit=x)]
     x_comments = [comment(a) for a in subreddit_object.get_comments(limit=x)]
-    x_subs = []
     i = 0
     for c in x_comments:
         print "x = ", i
@@ -154,33 +170,22 @@ if __name__ == "__main__":
             x_subs.append(c.subreddit)
         i += 1
     x_subs = [
-              'health',
-              'fitness',
-              'xxfitness',
-              'loseit',
-              'gainit',
-              'c25k',
-              'bodyweightfitness',
-              'weightroom',
-              'progresspics',
-              'advancedfitness',
-              'nutrition',
-              'keto',
-              'paleo',
-              'bodybuilding',
-              'vegan',
-              'running',
-              'cycling',
-              'sociology',
-              'bjj',
-              'soylent',
-              'fitmeals',
-              'walking',
-              'volleyball',
-              'swimming',
-              'yoga',
-              'vegetarian'
-              ]
+        'bicycling',
+        'running',
+        'hockey',
+        'nhl',
+        'winnipegjets',
+        'leafs',
+        'habs',
+        'bostonbruins',
+        'coldplay',
+        'radiohead',
+        'classicalmusic',
+        'jazz',
+        'hiphopheads',
+        'metal',
+        'postrock',
+        'letstalkmusic' ]
 
     y_comments = []
     i = 0
