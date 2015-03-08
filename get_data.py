@@ -184,10 +184,12 @@ if __name__ == "__main__":
         'metal',
         'postrock',
         'letstalkmusic' ]
+
     y_comments = []
     i = 0
+    print "Getting ", y, " comments from each of the ", len(x_subs), " subreddits"
     for x_sub in x_subs:
-        print "y = ", i
+        print "\tRetrieving ", 5, " comments from /r/", x_sub
         subreddit_object = reddit.get_subreddit(x_sub)
         y_comments += [comment(a) for a in subreddit_object.get_comments(limit=y)]
         i += 1
@@ -195,15 +197,18 @@ if __name__ == "__main__":
     z_comments = []
     redditors = []
     i = 0
+    print "Following commenters from original subs to gather their other reddit activity"
     for y_com in y_comments:
-        print y_com.subreddit, " z = ", i
         redditor = y_com.author_name
+        print "\tAnalyzing user ", redditor, " (user ", i, "/", len(y_comments), ")"
         if redditor not in redditors:
             try:
                 z_comments += [comment(a) for a in reddit.get_redditor(y_com.author_name).get_comments(limit=z)]
                 redditors.append(redditor)
             except:
-                print "oops, that user is weird"
+                print "\t\toops, that user is weird\n\t\tprobably deleted their comment or profile or something"
+        else:
+            print "\t\tAlready looked at this user, no need to make an other call."
         i += 1
 
     comments = list(z_comments)
