@@ -244,10 +244,6 @@ def run_percent_analysis(subredditA, subredditB, depth):
 
     file.close()
 
-
-
-
-
 if len(sys.argv) >= 2:
     if len(sys.argv) >= 3:
         if len(sys.argv) >= 4:
@@ -256,14 +252,3 @@ if len(sys.argv) >= 2:
             run_analysis(sys.argv[1], int(sys.argv[2]))
     else:
         run_analysis(sys.argv[1], 10)
-
-
-
-
-
-
-
-
-
-
-
