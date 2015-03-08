@@ -156,37 +156,34 @@ if __name__ == "__main__":
     reddit = praw.Reddit(user_agent)
     subredditName = 'all'
     subreddit_object = reddit.get_subreddit(subredditName)
-
-
-    x = 4
-    y = 100 #Comments per subreddit inspected
+    y = 5 #Comments per subreddit inspected
     z = 100 #Comments per user inspected
-    comments = [comment(a) for a in subreddit_object.get_comments(limit=x)]
-    x_comments = [comment(a) for a in subreddit_object.get_comments(limit=x)]
-    i = 0
-    for c in x_comments:
-        print "x = ", i
-        if c.subreddit not in x_subs:
-            x_subs.append(c.subreddit)
-        i += 1
+
+
+
+    #List of subreddits to be analyzed
+    # x_subs = [
+    #     'hiphopheads',
+    #     'metal',
+    #     'postrock',
+    #     'letstalkmusic' ]
+
+    #Commented code below is for pulling our x_subs from the most recent comments in /r/all
+
+    # x_comments = [comment(a) for a in subreddit_object.get_comments(limit=x)]
+    # i = 0
+    # for c in x_comments:
+    #     print "x = ", i
+    #     if c.subreddit not in x_subs:
+    #         x_subs.append(c.subreddit)
+    #     i += 1
+
+    #List of subreddits to be analyzed
     x_subs = [
-        'bicycling',
-        'running',
-        'hockey',
-        'nhl',
-        'winnipegjets',
-        'leafs',
-        'habs',
-        'bostonbruins',
-        'coldplay',
-        'radiohead',
-        'classicalmusic',
-        'jazz',
         'hiphopheads',
         'metal',
         'postrock',
         'letstalkmusic' ]
-
     y_comments = []
     i = 0
     for x_sub in x_subs:
@@ -215,6 +212,3 @@ if __name__ == "__main__":
     output = open('data.pkl', 'wb')
     pickle.dump(the_data,output)
     output.close()
-
-
-

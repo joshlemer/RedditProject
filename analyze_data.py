@@ -144,7 +144,6 @@ for sub in x_subs:
         else:
             sub_row.append(float(0))
     subreddit_rows.append(sub_row)
-#print subreddit_rows
 
 import sklearn.preprocessing
 subreddit_rows = sklearn.preprocessing.normalize(subreddit_rows)
