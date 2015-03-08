@@ -169,11 +169,13 @@ def run_analysis(subreddit, depth):
 
     myList = sorted(myList, key=operator.itemgetter(1),reverse=True)
 
-    file = open(subreddit + "_" + time.strftime("%Y-%m-%d") + "_" + time.strftime("%X") + ".txt", "w")
+    filename = subreddit + "_" + time.strftime("%Y-%m-%d") + "_" + time.strftime("%X") + ".txt"
+    file = open(filename, "w")
     for item in myList:
         file.write("%s   %s\n" % (item[0], item[1]))
 
     file.close()
+    print "Information printed to " + filename
 
 def run_diff_analysis(subredditA, subredditB, depth):
     projA = Projection(subredditA, depth)
@@ -205,11 +207,13 @@ def run_diff_analysis(subredditA, subredditB, depth):
 
     myList = sorted(myList, key=operator.itemgetter(1),reverse=True)
 
-    file = open(subredditA + "-" + subredditB + "_" + time.strftime("%Y-%m-%d") + "_" + time.strftime("%X") + ".txt", "w")
+    filename = subredditA + "-" + subredditB + "_" + time.strftime("%Y-%m-%d") + "_" + time.strftime("%X") + ".txt",
+    file = open(filename , "w")
     for item in myList:
         file.write("%s   %s\n" % (item[0], item[1]))
 
     file.close()
+    print "Information recorded to file " + filename
 
 def run_percent_analysis(subredditA, subredditB, depth):
     projA = Projection(subredditA, depth)
@@ -238,11 +242,13 @@ def run_percent_analysis(subredditA, subredditB, depth):
 
     myList = sorted(myList, key=operator.itemgetter(1),reverse=True)
 
-    file = open(subredditA + "-percent-of" + subredditB + "_" + time.strftime("%Y-%m-%d") + "_" + time.strftime("%X") + ".txt", "w")
+    filename = subredditA + "-percent-of" + subredditB + "_" + time.strftime("%Y-%m-%d") + "_" + time.strftime("%X") + ".txt"
+    file = open(filename, "w")
     for item in myList:
         file.write("%s   %s\n" % (item[0], item[1]))
 
     file.close()
+    print "Information printed to " + filename
 
 if len(sys.argv) >= 2:
     if len(sys.argv) >= 3:
