@@ -29,7 +29,21 @@ This program also requires you install PRAW, a library used to access the Reddit
 
     sudo pip install praw
 
-And to use the program, just 
+As well as a few more scientific computing Python packages..
+
+    sudo apt-get install python-scipy python-matplotlib python-tk python-sklearn
+
+And to use the program, just open up get_data.py, and set the x_subs python list to your desired subreddits (yeah this is gross sorry). And then:
+
+    python get_data.py
+
+This gathers all the data from reddit (this may take a while). To analyze the data and output the dendrograms:
+
+    python analyze_data.py
+
+And voila!
+
+There's also a second way to use the program, if you just do:
 
     python project.py YourSubredditHere 
 
@@ -58,13 +72,3 @@ This will output a text file with a list of communities and a number beside it, 
 
 The way to interpret these results is that Javascript commenters are 10001.4394 times as likely to post in /r/JavaScript as Python commenters are.
 JavaScript commenters are 24% more likely to post in Java than Python commenters are, but that Javascript commenters are only 54% as likely to post in /r/Ruby as python commenters are.
-
-
-
-#Future features
-
-I’ll soon have an “extended user profile” feature, where you input a reddit user, and it gathers the profiles of each of their frequented communities and amalgamates them according to how much the user goes in that community. This will be really great for predicting, say, what subreddits a user would like to comment in in the future.
-
-In the not-too-distant future, I’d like to start saving the data to a database, possibly offering the software as a web service.
-
-
