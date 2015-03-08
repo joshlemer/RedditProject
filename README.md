@@ -43,6 +43,12 @@ This gathers all the data from reddit (this may take a while). To analyze the da
 
 And voila!
 
+#Example outputs
+
+![Alt text](/variety_subs.jpg "Variety of Subs")
+![Alt text](/os_subs.png?raw=true "Operating Systems")
+![Alt text](/political_subs.jpg "A spectrum of Political Subs")
+
 There's also a second way to use the program, if you just do:
 
     python project.py YourSubredditHere 
